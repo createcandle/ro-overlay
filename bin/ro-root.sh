@@ -52,6 +52,12 @@ then
   exit0
 fi
 
+if [ -e "/boot/bootup_actions.sh" ]
+then
+  exit0
+fi
+
+
 fail(){
 	echo -e "$1"
 	/bin/bash
