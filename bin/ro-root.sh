@@ -49,12 +49,12 @@
 # Abort if specific file exists
 if [ -e "/boot/candle_rw.txt" ]
 then
-  exit0
+  exit 0
 fi
 
 if [ -e "/boot/bootup_actions.sh" ]
 then
-  exit0
+  exit 0
 fi
 
 
