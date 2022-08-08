@@ -57,6 +57,11 @@ then
   exit 0
 fi
 
+if [ ! -s /etc/machine-id ]
+then
+    systemd-machine-id-setup --commit
+fi
+
 
 fail(){
 	echo -e "$1"
