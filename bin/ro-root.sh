@@ -53,7 +53,7 @@
 #echo " " > /dev/kmsg
 
 if [ -d "/boot" ]; then
-  echo "/boot exists. Mount first partition on it. " > /dev/kmsg
+  echo "/boot exists. Mount first partition on it. " >> /dev/kmsg
   mount -t vfat /dev/mmcblk0p1 /boot
   
   if [ -e "/bin/ply-image" ]; then
@@ -98,7 +98,7 @@ if [ -d "/boot" ]; then
   fi
   
 else
-  echo "Candle: error: /boot did not exist?" > /dev/kmsg
+  echo "Candle: error: /boot did not exist?" >> /dev/kmsg
 fi
 
 #echo " " > /dev/kmsg
@@ -116,7 +116,7 @@ echo "Candle: not skipping read-only disk mode" >> /dev/kmsg
 
 fail(){
 	echo -e "$1"
-	echo "Candle: error in RO script: $1" > /dev/kmsg
+	echo "Candle: error in RO script: $1" >> /dev/kmsg
 	/bin/bash
 }
  
