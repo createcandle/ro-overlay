@@ -75,6 +75,7 @@ if [ -d "/boot" ]; then
   # Abort if specific file exists
   if [ -e "/boot/candle_rw_once.txt" ]
   then
+    echo "/boot/candle_rw_once.txt detected" >> /dev/kmsg
     umount /boot
     exec /sbin/init
 
