@@ -97,7 +97,7 @@ fi
 
 
 
-echo "Candle: did not skip read-only disk mode" >> /dev/kmsg
+echo "Candle: not skipping read-only disk mode" >> /dev/kmsg
 
 
 #if [ ! -s /etc/machine-id ]
