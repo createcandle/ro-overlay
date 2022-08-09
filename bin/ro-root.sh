@@ -46,25 +46,69 @@
 #  To install software, run upgrades and do other changes to the raspberry setup, simply remove the init= 
 #  entry from the cmdline.txt file and reboot, make the changes, add the init= entry and reboot once more. 
 
-# Abort if specific file exists
-if [ -e "/boot/candle_rw.txt" ]
-then
-  exit 0
+
+#blk=$(lsblk)
+#echo "blk before:" > /dev/kmsg
+#echo "$blk" >> /dev/kmsg
+#echo " " > /dev/kmsg
+
+if [ -d "/boot" ]; then
+  echo "/boot exists. Mount first partition on it. " > /dev/kmsg
+  mount -t vfat /dev/mmcblk0p1 /boot
+
+  #blkk=$(lsblk)
+  #echo "blk after:" > /dev/kmsg
+  #echo "$blkk" >> /dev/kmsg
+  #echo " " > /dev/kmsg
+
+  #logfileboot=$(ls /boot)
+  #echo "$logfileboot" >> /dev/kmsg
+
+  # Abort if specific file exists
+  if [ -e "/boot/candle_rw_once.txt" ]
+  then
+    umount /boot
+    exec /sbin/init
+
+  else
+    echo "/boot/candle_rw did not exist " >> /dev/kmsg
+    if [ -e "/boot/bootup_actions.sh" ]
+    then
+      echo "/boot/bootup_actions.sh  detected" >> /dev/kmsg
+      umount /boot
+      exec /sbin/init
+
+    else
+      if [ -e "/boot/candle_rw_keep.txt" ]
+      then
+        echo "/boot/candle_rw_keep.txt detected" >> /dev/kmsg
+        umount /boot
+        exec /sbin/init
+
+      fi
+    fi
+  fi
+  
+else
+  echo "Candle: error: /boot did not exist?" > /dev/kmsg
 fi
 
-if [ -e "/boot/bootup_actions.sh" ]
-then
-  exit 0
-fi
+#echo " " > /dev/kmsg
 
-if [ ! -s /etc/machine-id ]
-then
-    systemd-machine-id-setup --commit
-fi
+
+
+echo "Candle: did not skip read-only disk mode" >> /dev/kmsg
+
+
+#if [ ! -s /etc/machine-id ]
+#then
+#    systemd-machine-id-setup --commit
+#fi
 
 
 fail(){
 	echo -e "$1"
+	echo "Candle: error in RO script: $1" > /dev/kmsg
 	/bin/bash
 }
  
