@@ -55,7 +55,15 @@
 if [ -d "/boot" ]; then
   echo "/boot exists. Mount first partition on it. " > /dev/kmsg
   mount -t vfat /dev/mmcblk0p1 /boot
-
+  
+  if [ -e "/bin/ply-image" ]; then
+    if [ -e "/boot/rotate180.txt" ]; then
+      /bin/ply-image /boot/splash180alt.png
+    else
+      /bin/ply-image /boot/splashalt.png
+    fi
+  fi
+  
   #blkk=$(lsblk)
   #echo "blk after:" > /dev/kmsg
   #echo "$blkk" >> /dev/kmsg
