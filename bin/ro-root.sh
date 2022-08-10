@@ -81,7 +81,7 @@ if [ -d "/boot" ]; then
   else
     if [ -e "/boot/bootup_actions.sh" ]
     then
-      echo "/boot/bootup_actions.sh  detected" >> /dev/kmsg
+      echo "/boot/bootup_actions.sh detected" >> /dev/kmsg
       umount /boot
       exec /sbin/init
 
