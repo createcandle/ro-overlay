@@ -52,6 +52,18 @@
 #echo "$blk" >> /dev/kmsg
 #echo " " > /dev/kmsg
 
+if grep -qs "(mmcblk0p1): Volume was not properly unmounted." dmesg;
+then
+  echo "DOING FSCK OF /BOOT" >> /dev/kmsg
+  fsck.vfat /dev/mmcblk0p1 -a -v -V
+fi
+
+if grep -qs "(mmcblk0p3): Volume was not properly unmounted." dmesg;
+then
+  echo "DOING FSCK OF /BOOT" >> /dev/kmsg
+  fsck.ext4 -p /dev/mmcblk0p3
+fi
+
 if [ -d "/boot" ]; then
   mount -t vfat /dev/mmcblk0p1 /boot
   
