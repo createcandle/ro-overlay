@@ -53,7 +53,6 @@
 #echo " " > /dev/kmsg
 
 if [ -d "/boot" ]; then
-  echo "/boot exists. Mount first partition on it. " >> /dev/kmsg
   mount -t vfat /dev/mmcblk0p1 /boot
   
   if [ -e "/bin/ply-image" ]; then
@@ -80,7 +79,6 @@ if [ -d "/boot" ]; then
     exec /sbin/init
 
   else
-    echo "/boot/candle_rw did not exist " >> /dev/kmsg
     if [ -e "/boot/bootup_actions.sh" ]
     then
       echo "/boot/bootup_actions.sh  detected" >> /dev/kmsg
