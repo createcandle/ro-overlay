@@ -67,14 +67,6 @@ fi
 if [ -d "/boot" ]; then
   mount -t vfat /dev/mmcblk0p1 /boot
   
-  if [ -e "/bin/ply-image" ]; then
-    if [ -e "/boot/rotate180.txt" ]; then
-      /bin/ply-image /boot/splash180alt.png
-    else
-      /bin/ply-image /boot/splashalt.png
-    fi
-  fi
-  
   #blkk=$(lsblk)
   #echo "blk after:" > /dev/kmsg
   #echo "$blkk" >> /dev/kmsg
@@ -87,8 +79,28 @@ if [ -d "/boot" ]; then
   if [ -e "/boot/candle_rw_once.txt" ] || [ -e "/boot/bootup_actions.sh" ] || [ -e "/boot/candle_rw_keep.txt" ]  || [ -e "/boot/restore_boot_backup.txt" ]  || [ -e "/boot/restore_controller_backup.txt" ]; 
   then
     echo "candle: ro-root: detected file that prevents entering read-only mode" >> /dev/kmsg
+    
+     if [ -e "/bin/ply-image" ]; then
+      if [ -e "/boot/rotate180.txt" ]; then
+        /bin/ply-image /boot/splash_updating180.png
+      else
+        /bin/ply-image /boot/splash_updating.png
+      fi
+    fi
+    
     umount /boot
     exec /sbin/init
+    
+  else
+  
+    if [ -e "/bin/ply-image" ]; then
+      if [ -e "/boot/rotate180.txt" ]; then
+        /bin/ply-image /boot/splash180alt.png
+      else
+        /bin/ply-image /boot/splashalt.png
+      fi
+    fi
+    
   fi
   
 else
