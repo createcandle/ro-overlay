@@ -54,13 +54,13 @@
 
 if grep -qs "(mmcblk0p1): Volume was not properly unmounted." dmesg;
 then
-  echo "DOING FSCK OF /BOOT" >> /dev/kmsg
+  echo "candle: ro-root: DOING FSCK OF /BOOT" >> /dev/kmsg
   fsck.vfat /dev/mmcblk0p1 -a -v -V
 fi
 
 if grep -qs "(mmcblk0p3): Volume was not properly unmounted." dmesg;
 then
-  echo "DOING FSCK OF /BOOT" >> /dev/kmsg
+  echo "candle: ro-root: DOING FSCK OF /BOOT" >> /dev/kmsg
   fsck.ext4 -y /dev/mmcblk0p3
 fi
 
@@ -84,39 +84,22 @@ if [ -d "/boot" ]; then
   #echo "$logfileboot" >> /dev/kmsg
 
   # Abort if specific file exists
-  if [ -e "/boot/candle_rw_once.txt" ]
+  if [ -e "/boot/candle_rw_once.txt" ] || [ -e "/boot/bootup_actions.sh" ] || [ -e "/boot/candle_rw_keep.txt" ]  || [ -e "/boot/restore_boot_backup.txt" ]  || [ -e "/boot/restore_controller_backup.txt" ]; 
   then
     echo "/boot/candle_rw_once.txt detected" >> /dev/kmsg
     umount /boot
     exec /sbin/init
-
-  else
-    if [ -e "/boot/bootup_actions.sh" ]
-    then
-      echo "/boot/bootup_actions.sh detected" >> /dev/kmsg
-      umount /boot
-      exec /sbin/init
-
-    else
-      if [ -e "/boot/candle_rw_keep.txt" ]
-      then
-        echo "/boot/candle_rw_keep.txt detected" >> /dev/kmsg
-        umount /boot
-        exec /sbin/init
-
-      fi
-    fi
   fi
   
 else
-  echo "Candle: error: /boot did not exist?" >> /dev/kmsg
+  echo "Candle: ro-root: error: /boot did not exist?" >> /dev/kmsg
 fi
 
 #echo " " > /dev/kmsg
 
 
 
-echo "Candle: not skipping read-only disk mode" >> /dev/kmsg
+echo "Candle: ro-root: not skipping read-only disk mode" >> /dev/kmsg
 
 
 #if [ ! -s /etc/machine-id ]
