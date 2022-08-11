@@ -80,7 +80,7 @@ if [ -d "/boot" ]; then
   then
     echo "candle: ro-root: detected file that prevents entering read-only mode" >> /dev/kmsg
     
-     if [ -e "/bin/ply-image" ]; then
+    if [ -e "/bin/ply-image" ]; then
       if [ -e "/boot/rotate180.txt" ]; then
         /bin/ply-image /boot/splash_updating180.png
       else
