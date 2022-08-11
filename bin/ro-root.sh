@@ -86,7 +86,7 @@ if [ -d "/boot" ]; then
   # Abort if specific file exists
   if [ -e "/boot/candle_rw_once.txt" ] || [ -e "/boot/bootup_actions.sh" ] || [ -e "/boot/candle_rw_keep.txt" ]  || [ -e "/boot/restore_boot_backup.txt" ]  || [ -e "/boot/restore_controller_backup.txt" ]; 
   then
-    echo "/boot/candle_rw_once.txt detected" >> /dev/kmsg
+    echo "candle: ro-root: detected file that prevents entering read-only mode" >> /dev/kmsg
     umount /boot
     exec /sbin/init
   fi
