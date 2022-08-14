@@ -66,6 +66,8 @@ fi
 
 if [ -d "/boot" ]; then
   mount -t vfat /dev/mmcblk0p1 /boot
+  ls /dev > /boot/ls_dev.txt
+  
   
   #blkk=$(lsblk)
   #echo "blk after:" > /dev/kmsg
@@ -153,7 +155,40 @@ mkdir /mnt/newroot
 rootDev=`awk '$2 == "/" {print $1}' /proc/mounts`
 rootMountOpt=`awk '$2 == "/" {print $4}' /proc/mounts`
 rootFsType=`awk '$2 == "/" {print $3}' /proc/mounts`
-mount -t ${rootFsType} -o ${rootMountOpt},ro ${rootDev} /mnt/lower
+mount -t ${rootFsType} -o ${rootMountOpt},rw ${rootDev} /mnt/lower # modified to start RW
+if [ $? -ne 0 ]; then
+    if [ -f /boot/cmdline.txt ]; then
+    	echo "ERROR, ro-root.sh could not mount root partition" >> /boot/candle.log
+    fi
+    fail "ERROR: could not rw-mount original root partition"
+fi
+# here it's possible to make some changes to the system partition before its becomes read only
+if lsblk | grep -q 'mmcblk0p4'; 
+then
+    # If mmcblk0p4 partition exists, it should be mounted as /home/pi/.webthings
+    # This probably never happens, but can't hurt either
+    if cat /mnt/lower/etc/fstab | grep -q '/dev/mmcblk0p3  /home/pi/.webthings'; then
+        sed -i 's/mmcblk0p3/mmcblk0p4/g' /mnt/lower/etc/fstab
+    fi
+else
+    if cat /mnt/lower/etc/fstab | grep -q '/dev/mmcblk0p4  /home/pi/.webthings'; then
+        # fstab is pointing to partition #4  but it doesn't exist. This must be an older Candle version without the resque partition.
+	sed -i 's/mmcblk0p4/mmcblk0p3/g' /mnt/lower/etc/fstab
+	if [ ! -f /boot/candle_no_4th_partition.txt ] && [ -f /boot/cmdline.txt ]; then
+	    echo "ro-root.sh has modified fstab because your controller does not have a resque partition." >> /boot/candle.log
+            echo "Your Candle controller is an older version without a rescue partition. You may want to start with a fresh disk image." > /boot/candle_no_4th_partition.txt
+        fi
+    fi
+fi
+
+# rescue option to provide a new fstab file
+if [ -f /boot/fstab.txt ]; then
+    cp /boot/fstab.txt /mnt/lower/etc/fstab
+fi
+
+# undo Candle modifications to the process so far
+umount /boot
+mount -o remount,ro /mnt/lower # make system partition read only
 if [ $? -ne 0 ]; then
     fail "ERROR: could not ro-mount original root partition"
 fi
@@ -169,6 +204,7 @@ grep -v "$rootDev" /mnt/lower/etc/fstab > /mnt/newroot/etc/fstab
 echo "#the original root mount has been removed by overlayRoot.sh" >> /mnt/newroot/etc/fstab
 echo "#this is only a temporary modification, the original fstab" >> /mnt/newroot/etc/fstab
 echo "#stored on the disk can be found in /ro/etc/fstab" >> /mnt/newroot/etc/fstab
+
 # change to the new overlay root
 cd /mnt/newroot
 pivot_root . mnt
