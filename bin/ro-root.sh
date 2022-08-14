@@ -152,9 +152,9 @@ mkdir /mnt/rw/work
 mkdir /mnt/newroot
 
 # mount root filesystem readonly 
-rootDev=`awk '$2 == "/" {print $1}' /proc/mounts`
-rootMountOpt=`awk '$2 == "/" {print $4}' /proc/mounts`
-rootFsType=`awk '$2 == "/" {print $3}' /proc/mounts`
+rootDev=$(awk '$2 == "/" {print $1}' /proc/mounts)
+rootMountOpt=$(awk '$2 == "/" {print $4}' /proc/mounts)
+rootFsType=$(awk '$2 == "/" {print $3}' /proc/mounts)
 mount -t ${rootFsType} -o ${rootMountOpt},rw ${rootDev} /mnt/lower # modified to start RW
 if [ $? -ne 0 ]; then
     if [ -f /boot/cmdline.txt ]; then
