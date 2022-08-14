@@ -163,6 +163,9 @@ if [ $? -ne 0 ]; then
     fail "ERROR: could not rw-mount original root partition"
 fi
 # here it's possible to make some changes to the system partition before its becomes read only
+
+touch /mnt/lower/home/pi/RO-ROOT_WAS_HERE
+
 if lsblk | grep -q 'mmcblk0p4'; 
 then
     # If mmcblk0p4 partition exists, it should be mounted as /home/pi/.webthings
