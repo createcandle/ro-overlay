@@ -164,7 +164,7 @@ if [ $? -ne 0 ]; then
 fi
 # here it's possible to make some changes to the system partition before its becomes read only
 
-touch /mnt/lower/home/pi/RO-ROOT_WAS_HERE
+touch /mnt/lower/home/pi/candle/RO-ROOT_WAS_HERE
 
 if lsblk | grep -q 'mmcblk0p4'; 
 then
