@@ -155,12 +155,12 @@ mkdir /mnt/newroot
 rootDev=$(awk '$2 == "/" {print $1}' /proc/mounts)
 rootMountOpt=$(awk '$2 == "/" {print $4}' /proc/mounts)
 rootFsType=$(awk '$2 == "/" {print $3}' /proc/mounts)
-mount -t ${rootFsType} -o ${rootMountOpt},rw ${rootDev} /mnt/lower # modified to start RW
+mount -t ${rootFsType} -o ${rootMountOpt},ro ${rootDev} /mnt/lower # modified to start RW
 if [ $? -ne 0 ]; then
     if [ -f /boot/cmdline.txt ]; then
-    	echo "ERROR, ro-root.sh could not mount root partition" >> /boot/candle.log
+    	echo "ERROR, ro-root.sh could not mount root partition" >> /boot/candle_log.txt
     fi
-    fail "ERROR: could not rw-mount original root partition"
+    fail "ERROR: could not-mount original root partition"
 fi
 # here it's possible to make some changes to the system partition before its becomes read only
 
@@ -178,7 +178,7 @@ else
         # fstab is pointing to partition #4  but it doesn't exist. This must be an older Candle version without the resque partition.
 	sed -i 's/mmcblk0p4/mmcblk0p3/g' /mnt/lower/etc/fstab
 	if [ ! -f /boot/candle_no_4th_partition.txt ] && [ -f /boot/cmdline.txt ]; then
-	    echo "ro-root.sh has modified fstab because your controller does not have a resque partition." >> /boot/candle.log
+	    echo "ro-root.sh has modified fstab because your controller does not have a resque partition." >> /boot/candle_log.txt
             echo "Your Candle controller is an older version without a rescue partition. You may want to start with a fresh disk image." > /boot/candle_no_4th_partition.txt
         fi
     fi
