@@ -66,7 +66,7 @@ fi
 
 if [ -d "/boot" ]; then
   mount -t vfat /dev/mmcblk0p1 /boot
-  ls /dev > /boot/ls_dev.txt
+  #ls /dev > /boot/ls_dev.txt
   
   
   #blkk=$(lsblk)
