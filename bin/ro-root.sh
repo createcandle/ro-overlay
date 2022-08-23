@@ -58,16 +58,29 @@ then
   fsck.vfat /dev/mmcblk0p1 -a -v -V
 fi
 
+if grep -qs "(mmcblk0p2): Volume was not properly unmounted." dmesg;
+then
+  echo "candle: ro-root: DOING FSCK OF mmcblk0p2" >> /dev/kmsg
+  fsck.ext4 -y /dev/mmcblk0p2
+fi
+
 if grep -qs "(mmcblk0p3): Volume was not properly unmounted." dmesg;
 then
-  echo "candle: ro-root: DOING FSCK OF /BOOT" >> /dev/kmsg
+  echo "candle: ro-root: DOING FSCK OF mmcblk0p3" >> /dev/kmsg
   fsck.ext4 -y /dev/mmcblk0p3
 fi
+
+if grep -qs "(mmcblk0p4): Volume was not properly unmounted." dmesg;
+then
+  echo "candle: ro-root: DOING FSCK OF mmcblk0p4" >> /dev/kmsg
+  fsck.ext4 -y /dev/mmcblk0p4
+fi
+
 
 if [ -d "/boot" ]; then
   mount -t vfat /dev/mmcblk0p1 /boot
   #ls /dev > /boot/ls_dev.txt
-  
+  echo "$(cat /proc/mounts)" > /boot/roroot_proc_mounts.txt
   
   #blkk=$(lsblk)
   #echo "blk after:" > /dev/kmsg
@@ -78,7 +91,11 @@ if [ -d "/boot" ]; then
   #echo "$logfileboot" >> /dev/kmsg
 
   # Abort if specific file exists
-  if [ -e "/boot/candle_rw_once.txt" ] || [ -e "/boot/bootup_actions.sh" ] || [ -e "/boot/candle_rw_keep.txt" ]  || [ -e "/boot/restore_boot_backup.txt" ]  || [ -e "/boot/restore_controller_backup.txt" ]; 
+  if [ -e "/boot/candle_rw_once.txt" ] \
+  || [ -e "/boot/bootup_actions.sh" ] \
+  || [ -e "/boot/candle_rw_keep.txt" ]  \
+  || [ -e "/boot/restore_boot_backup.txt" ]  \
+  || [ -e "/boot/restore_controller_backup.txt" ]; 
   then
     echo "candle: ro-root: detected file that prevents entering read-only mode" >> /dev/kmsg
     
@@ -104,7 +121,7 @@ if [ -d "/boot" ]; then
     fi
     
   fi
-  
+  #umount /boot
 else
   echo "Candle: ro-root: error: /boot did not exist?" >> /dev/kmsg
 fi
@@ -123,19 +140,19 @@ echo "Candle: ro-root: not skipping read-only disk mode" >> /dev/kmsg
 
 
 fail(){
-	echo -e "$1"
-	echo "Candle: error in RO script: $1" >> /dev/kmsg
-	if [ -f /boot/cmdline.txt ] || [ -f /boot/config.txt ]; then
-    	    echo "ERROR in ro-root.sh: $1" >> /boot/candle_log.txt
-        fi
-	if [ -f /sbin/init ]; then
-	    umount /boot
-            exec /sbin/init
-	else
-	    /bin/bash
-	fi
+    echo -e "$1"
+    echo "Candle: error in RO script: $1" >> /dev/kmsg
+    if [ -f /boot/cmdline.txt ] || [ -f /boot/config.txt ]; then
+        echo "ERROR in ro-root.sh: $1" >> /boot/candle_log.txt
+    fi
+    if [ -f /sbin/init ]; then
+        umount /boot
+        exec /sbin/init
+    else
+        /bin/bash
+    fi
 }
- 
+
 # load module
 modprobe overlay
 if [ $? -ne 0 ]; then
@@ -163,14 +180,15 @@ mkdir /mnt/newroot
 rootDev=$(awk '$2 == "/" {print $1}' /proc/mounts)
 rootMountOpt=$(awk '$2 == "/" {print $4}' /proc/mounts)
 rootFsType=$(awk '$2 == "/" {print $3}' /proc/mounts)
-mount -t ${rootFsType} -o ${rootMountOpt},ro ${rootDev} /mnt/lower # modified to start RW
+#mount -t ${rootFsType} -o ${rootMountOpt},ro ${rootDev} /mnt/lower # no longer modified to start RW
+mount -t "${rootFsType}" -o "${rootMountOpt}",ro "${rootDev}" /mnt/lower # no longer modified to start RW
 if [ $? -ne 0 ]; then
     if [ -f /boot/cmdline.txt ]; then
     	echo "ERROR, ro-root.sh could not mount root partition" >> /boot/candle_log.txt
 	echo "$(cat /proc/mounts)" > /boot/roroot_proc_mounts.txt
 	
     fi
-    fail "ERROR: could not-mount original root partition"
+    fail "ERROR: ro-root.sh could not-mount original root partition"
 fi
 # here it's possible to make some changes to the system partition before its becomes read only
 
@@ -227,9 +245,14 @@ if [ -f /boot/fstab.txt ]; then
     cp /boot/fstab.txt /mnt/lower/etc/fstab
 fi
 
+#umount candle mod
+umount /boot
+
 # change to the new overlay root
 cd /mnt/newroot
 pivot_root . mnt
+
+# Chroot
 exec chroot . sh -c "$(cat <<END
 # move ro and rw mounts to the new root
 mount --move /mnt/mnt/lower/ /ro
