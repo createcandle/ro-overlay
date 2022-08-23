@@ -186,6 +186,9 @@ mount -t "${rootFsType}" -o "${rootMountOpt}",ro "${rootDev}" /mnt/lower # no lo
 if [ $? -ne 0 ]; then
     if [ -f /boot/cmdline.txt ]; then
     	echo "ERROR, ro-root.sh could not mount root partition" >> /boot/candle_log.txt
+	echo "rootDev: $rootDev"
+	echo "rootMountOpt: $rootMountOpt"
+	echo "rootFsType: $rootFsType"
 	echo "$(cat /proc/mounts)" > /boot/roroot_proc_mounts.txt
 	
     fi
@@ -208,9 +211,11 @@ mount -t overlay -o lowerdir=/mnt/lower,upperdir=/mnt/rw/upper,workdir=/mnt/rw/w
 if [ $? -ne 0 ]; then
     fail "ERROR: could not mount overlayFS"
 fi
+
 # create mountpoints inside the new root filesystem-overlay
 mkdir /mnt/newroot/ro
 mkdir /mnt/newroot/rw
+
 
 # Candle safeguard fixes to fstab
 if [ -f /usr/bin/lsblk ]; then
@@ -232,7 +237,6 @@ if [ -f /usr/bin/lsblk ]; then
         fi
     fi
 fi
-
 
 
 # remove root mount from fstab (this is already a non-permanent modification)
