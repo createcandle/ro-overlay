@@ -125,7 +125,15 @@ echo "Candle: ro-root: not skipping read-only disk mode" >> /dev/kmsg
 fail(){
 	echo -e "$1"
 	echo "Candle: error in RO script: $1" >> /dev/kmsg
-	/bin/bash
+	if [ -f /boot/cmdline.txt ] || [ -f /boot/config.txt ]; then
+    	    echo "ERROR, ro-root.sh: $1" >> /boot/candle_log.txt
+        fi
+	if [ -f /sbin/init ]; then
+	    umount /boot
+            exec /sbin/init
+	else
+	    /bin/bash
+	fi
 }
  
 # load module
@@ -164,7 +172,7 @@ if [ $? -ne 0 ]; then
 fi
 # here it's possible to make some changes to the system partition before its becomes read only
 
-touch /mnt/lower/home/pi/candle/RO-ROOT_WAS_HERE
+#touch /mnt/lower/home/pi/candle/RO-ROOT_WAS_HERE
 
 if lsblk | grep -q 'mmcblk0p4'; 
 then
@@ -182,11 +190,6 @@ else
             echo "Your Candle controller is an older version without a rescue partition. You may want to start with a fresh disk image." > /boot/candle_no_4th_partition.txt
         fi
     fi
-fi
-
-# rescue option to provide a new fstab file
-if [ -f /boot/fstab.txt ]; then
-    cp /boot/fstab.txt /mnt/lower/etc/fstab
 fi
 
 # undo Candle modifications to the process so far
@@ -207,6 +210,11 @@ grep -v "$rootDev" /mnt/lower/etc/fstab > /mnt/newroot/etc/fstab
 echo "#the original root mount has been removed by overlayRoot.sh" >> /mnt/newroot/etc/fstab
 echo "#this is only a temporary modification, the original fstab" >> /mnt/newroot/etc/fstab
 echo "#stored on the disk can be found in /ro/etc/fstab" >> /mnt/newroot/etc/fstab
+
+# rescue option to provide a new fstab file
+if [ -f /boot/fstab.txt ]; then
+    cp /boot/fstab.txt /mnt/lower/etc/fstab
+fi
 
 # change to the new overlay root
 cd /mnt/newroot
