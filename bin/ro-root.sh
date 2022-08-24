@@ -52,33 +52,42 @@
 #echo "$blk" >> /dev/kmsg
 #echo " " > /dev/kmsg
 
+early=
 if grep -qs "(mmcblk0p1): Volume was not properly unmounted." dmesg;
 then
   echo "candle: ro-root: DOING FSCK OF /BOOT" >> /dev/kmsg
+  early+=$'\nDOING FSCK OF /BOOT'
   fsck.vfat /dev/mmcblk0p1 -a -v -V
 fi
 
 if grep -qs "(mmcblk0p2): Volume was not properly unmounted." dmesg;
 then
   echo "candle: ro-root: DOING FSCK OF mmcblk0p2" >> /dev/kmsg
+  early+=$'\nDOING FSCK OF mmcblk0p2'
   fsck.ext4 -y /dev/mmcblk0p2
 fi
 
 if grep -qs "(mmcblk0p3): Volume was not properly unmounted." dmesg;
 then
   echo "candle: ro-root: DOING FSCK OF mmcblk0p3" >> /dev/kmsg
+  early+=$'\nDOING FSCK OF mmcblk0p3'
   fsck.ext4 -y /dev/mmcblk0p3
 fi
 
 if grep -qs "(mmcblk0p4): Volume was not properly unmounted." dmesg;
 then
   echo "candle: ro-root: DOING FSCK OF mmcblk0p4" >> /dev/kmsg
+  early+=$'\nDOING FSCK OF mmcblk0p4'
   fsck.ext4 -y /dev/mmcblk0p4
 fi
 
 
 if [ -d "/boot" ]; then
   mount -t vfat /dev/mmcblk0p1 /boot
+
+  # write results from early disk checks to log
+  echo "$early" >> /boot/candle_log.txt
+  
   #ls /dev > /boot/ls_dev.txt
   #echo "$(cat /proc/mounts)" > /boot/roroot_proc_mounts.txt
   #"$(cat /proc/mounts)" > /boot/roroot_proc_mounts2.txt
