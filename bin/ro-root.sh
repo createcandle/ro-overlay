@@ -80,8 +80,8 @@ fi
 if [ -d "/boot" ]; then
   mount -t vfat /dev/mmcblk0p1 /boot
   #ls /dev > /boot/ls_dev.txt
-  echo "$(cat /proc/mounts)" > /boot/roroot_proc_mounts.txt
-  "$(cat /proc/mounts)" > /boot/roroot_proc_mounts2.txt
+  #echo "$(cat /proc/mounts)" > /boot/roroot_proc_mounts.txt
+  #"$(cat /proc/mounts)" > /boot/roroot_proc_mounts2.txt
   
   #blkk=$(lsblk)
   #echo "blk after:" > /dev/kmsg
