@@ -213,10 +213,7 @@ if [ $? -ne 0 ]; then
     fail "ERROR: could not mount overlayFS"
 fi
 
-# Candle addition: unmount /boot
-if [ -f "/boot/cmdline.txt" ]; then
-  umount /boot
-fi
+
 
 # create mountpoints inside the new root filesystem-overlay
 mkdir /mnt/newroot/ro
@@ -226,6 +223,20 @@ grep -v "$rootDev" /mnt/lower/etc/fstab > /mnt/newroot/etc/fstab
 echo "#the original root mount has been removed by overlayRoot.sh" >> /mnt/newroot/etc/fstab
 echo "#this is only a temporary modification, the original fstab" >> /mnt/newroot/etc/fstab
 echo "#stored on the disk can be found in /ro/etc/fstab" >> /mnt/newroot/etc/fstab
+
+# fall back to third partition if fourth partition cannot be found
+if ! lsblk | grep -q 'mmcblk0p4'; then
+    sed -i ' 1 s|mmcblk0p4|mmcblk0p3|g' /mnt/newroot/etc/fstab
+    if [ -f "/boot/cmdline.txt" ]; then
+        echo "ERROR in ro-root.sh: fstab pointed to partition 4 but it did not exist?" >> /boot/candle_log.txt
+    fi
+fi
+
+# Candle addition: unmount /boot
+if [ -f "/boot/cmdline.txt" ]; then
+  umount /boot
+fi
+
 # change to the new overlay root
 cd /mnt/newroot
 pivot_root . mnt
