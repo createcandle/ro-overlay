@@ -103,13 +103,14 @@ if [ -d "/boot" ]; then
   #logfileboot=$(ls /boot)
   #echo "$logfileboot" >> /dev/kmsg
 
-  # Abort if specific file exists
+  # Abort if specific file exists (or does not exist, in the case of the first-run-complete indicator)
   if [ -e "/boot/candle_rw_once.txt" ] \
   || [ -e "/boot/candle_rw_keep.txt" ]  \
   || [ -e "/boot/bootup_actions.sh" ] \
   || [ -e "/boot/emergency.txt" ] \
   || [ -e "/boot/post_bootup_actions.sh" ] \
-  || [ -e "/boot/restore_boot_backup.txt" ]  \
+  || [ -e "/boot/restore_boot_backup.txt" ] \
+  || [ ! -e "/boot/candle_first_run_complete.txt" ] \
   || [ -e "/boot/restore_controller_backup.txt" ]; 
   then
     echo "candle: ro-root: detected file that prevents entering read-only mode"
