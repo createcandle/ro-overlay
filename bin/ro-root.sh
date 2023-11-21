@@ -89,11 +89,11 @@ fi
 
 if [ -d "/boot" ]; then
   mount -t vfat /dev/mmcblk0p1 /boot
-  #ls /dev > /boot/ls_dev.txt
+  #ls /dev > /boot/firmware/ls_dev.txt
 
   # write results from early disk checks to log
   if [ -n "$early" ]; then
-    echo "$early" >> /boot/candle_log.txt
+    echo "$early" >> /boot/firmware/candle_log.txt
   fi
   #blkk=$(lsblk)
   #echo "blk after:" > /dev/kmsg
@@ -104,23 +104,23 @@ if [ -d "/boot" ]; then
   #echo "$logfileboot" >> /dev/kmsg
 
   # Abort if specific file exists (or does not exist, in the case of the first-run-complete indicator)
-  if [ -e "/boot/candle_rw_once.txt" ] \
-  || [ -e "/boot/candle_rw_keep.txt" ]  \
-  || [ -e "/boot/bootup_actions.sh" ] \
-  || [ -e "/boot/emergency.txt" ] \
-  || [ -e "/boot/post_bootup_actions.sh" ] \
-  || [ -e "/boot/restore_boot_backup.txt" ] \
-  || [ ! -e "/boot/candle_first_run_complete.txt" ] \
-  || [ -e "/boot/restore_controller_backup.txt" ]; 
+  if [ -e "/boot/firmware/candle_rw_once.txt" ] \
+  || [ -e "/boot/firmware/candle_rw_keep.txt" ]  \
+  || [ -e "/boot/firmware/bootup_actions.sh" ] \
+  || [ -e "/boot/firmware/emergency.txt" ] \
+  || [ -e "/boot/firmware/post_bootup_actions.sh" ] \
+  || [ -e "/boot/firmware/restore_boot_backup.txt" ] \
+  || [ ! -e "/boot/firmware/candle_first_run_complete.txt" ] \
+  || [ -e "/boot/firmware/restore_controller_backup.txt" ]; 
   then
     echo "candle: ro-root: detected file that prevents entering read-only mode"
     echo "candle: ro-root: detected file that prevents entering read-only mode" >> /dev/kmsg
     
     if [ -e "/bin/ply-image" ]; then
-      if [ -e "/boot/rotate180.txt" ]; then
-        /bin/ply-image /boot/splash_updating180.png
+      if [ -e "/boot/firmware/rotate180.txt" ]; then
+        /bin/ply-image /boot/firmware/splash_updating180.png
       else
-        /bin/ply-image /boot/splash_updating.png
+        /bin/ply-image /boot/firmware/splash_updating.png
       fi
     fi
     
@@ -130,10 +130,10 @@ if [ -d "/boot" ]; then
   else
   
     if [ -e "/bin/ply-image" ]; then
-      if [ -e "/boot/rotate180.txt" ]; then
-        /bin/ply-image /boot/splash180alt.png
+      if [ -e "/boot/firmware/rotate180.txt" ]; then
+        /bin/ply-image /boot/firmware/splash180alt.png
       else
-        /bin/ply-image /boot/splashalt.png
+        /bin/ply-image /boot/firmware/splashalt.png
       fi
     fi
     
@@ -161,8 +161,8 @@ echo "Candle: ro-root: not skipping read-only disk mode" >> /dev/kmsg
 fail(){
     echo -e "$1"
     echo "Candle: error in RO script: $1" >> /dev/kmsg
-    if [ -f /boot/cmdline.txt ] || [ -f /boot/config.txt ]; then
-        echo "ERROR in ro-root.sh: $1" >> /boot/candle_log.txt
+    if [ -f /boot/firmware/cmdline.txt ] || [ -f /boot/firmware/config.txt ]; then
+        echo "ERROR in ro-root.sh: $1" >> /boot/firmware/candle_log.txt
     fi
     if [ -f /sbin/init ]; then
         umount /boot
@@ -180,10 +180,10 @@ fi
 # mount /proc
 mount -t proc proc /proc
 
-if [ -f /boot/developer.txt ]; then
-  ls /dev > /boot/ls_dev.txt
-  cat /proc/mounts > /boot/roc_mounts.txt
-  ls /proc > /boot/ls_proc.txt
+if [ -f /boot/firmware/developer.txt ]; then
+  ls /dev > /boot/firmware/ls_dev.txt
+  cat /proc/mounts > /boot/firmware/roc_mounts.txt
+  ls /proc > /boot/firmware/ls_proc.txt
 fi
 
 # create a writable fs to then create our mountpoints 
@@ -228,13 +228,13 @@ echo "#stored on the disk can be found in /ro/etc/fstab" >> /mnt/newroot/etc/fst
 # fall back to third partition if fourth partition cannot be found
 if ! lsblk | grep -q 'mmcblk0p4'; then
     sed -i ' 1 s|mmcblk0p4|mmcblk0p3|g' /mnt/newroot/etc/fstab
-    if [ -f "/boot/cmdline.txt" ]; then
-        echo "ERROR in ro-root.sh: fstab pointed to partition 4 but it did not exist?" >> /boot/candle_log.txt
+    if [ -f "/boot/firmware/cmdline.txt" ]; then
+        echo "ERROR in ro-root.sh: fstab pointed to partition 4 but it did not exist?" >> /boot/firmware/candle_log.txt
     fi
 fi
 
 # Candle addition: unmount /boot
-if [ -f "/boot/cmdline.txt" ]; then
+if [ -f "/boot/firmware/cmdline.txt" ]; then
   umount /boot
 fi
 
