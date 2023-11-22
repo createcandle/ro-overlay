@@ -88,7 +88,8 @@ fi
 
 
 if [ -d "/boot" ]; then
-  mount -t vfat /dev/mmcblk0p1 /boot
+  mkdir -p /boot/firmware
+  mount -t vfat /dev/mmcblk0p1 /boot/firmware
   #ls /dev > /boot/firmware/ls_dev.txt
 
   # write results from early disk checks to log
